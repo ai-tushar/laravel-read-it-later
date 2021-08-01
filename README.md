@@ -1,61 +1,113 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Laravel Read It Later
 
-## About Laravel
+### Installation
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+#### Step 1:
+Clone the directory to your local machine using the below git command. and change command promt directory to project directory.
+```
+git clone https://github.com/ai-tushar/laravel-read-it-later.git
+```
+#### Step 2:
+open command prompt from inside the project directory (laravel-read-it-later). If you are using Windows operating system, please use WSL command line with Ubuntu 20 image linked.
+The below steps are considering that your machine has a working docker installation.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+#### Step 3:
+After opening command prompt from inside the project directory, run the below command to install dependencies.
+```
+docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/opt" -w /opt laravelsail/php80-composer:latest composer install --ignore-platform-reqs
+```
+#### Step 4:
+execute the below command to make an alias for laravel `sail`. so we dont have to write `./vendor/bin/sail` every time
+```
+alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
+```
+#### Step 5: Environment setup
+In root directory copy `.env.example` file to `.env`. 
+Open `.env` file. Update the database connection info in below 4 properties,
+```
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=<DB NAME YOU WANT THIS PROJECT TO RUN ON>
+DB_USERNAME=<DB USER NAME>
+DB_PASSWORD=<DB PASSWORD>
+```
+`DB_PORT` is `3306` by default. You can change it to another free port. If you keep the default value, please make sure the port isnt being used by any other service.
+`DB_HOST` should be `mysql`
+`QUEUE_CONNECTION` is by default `sync`. All the Queue Jobs are synchronouse at this stage. Please change this value to `database`. So it will be like the following,
+```
+QUEUE_CONNECTION=database
+```
+#### Step 6: 
+Run docker using laravel `sail` package with below command
+```
+sail up -d
+```
+Run below command to generate application key
+```
+sail artisan key:generate
+```
+#### Step 7:
+Run below command to run migrations in order to create tables
+```
+sail artisan migrate
+```
+#### Step 8:
+To listen to Queued jobs run the below command,
+```
+sail artisan queue:work
+```
+#### Step 9:
+Browse `http:://localhost` in your browser
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Note for making api request
+While making API request, please make sure you add the below 2 header in your request,
+```
+Content-Type: application/json
+Accept: application/json
+```
 
-## Learning Laravel
+### Creating Pocket
+Make POST request to `http://localhost/api/v1/pockets` with a JSON string in request body like `{"title": "Pocket Test 1"}`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Creating Content in Pocket
+Make POST request to `http://localhost/api/v1/pockets/{id}/contents` with a JSON string in request body like `{"url": "valid-url-only"}`
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### View all Content in one Pocket
+Make GET request to `http://localhost/api/v1/pockets/{id}/contents`
 
-## Laravel Sponsors
+### Delete Stored Content
+Make DELETE request to `http://localhost/api/v1/contents/{id}`
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+### Delete Stored Pocket
+Make DELETE request to `http://localhost/api/v1/pockets/{id}`
 
-### Premium Partners
+### View all Contents by Pockets 
+Browse `http://localhost/pockets` in your browser to view all contents by pockets
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
+### View Scraped data
+In `http://localhost/pockets` beside each content url there is a button to view parsed data. clicking on it will open a new page which will show the parsed data from this url. 
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Bonus Points
+- After Saving a Content it will Trigger an Event. 
+- A listener will execute when the event triggered. 
+- Inside the event it will dispatch a Job
+- Job will call WebCrawlerService class to parse data (h1/h2, img, excerpts) and store into DB
 
-## Code of Conduct
+## Used the followings
+- Eloquent
+- Migration
+- FormRequest
+- ApiResource
+- Blade
+- Service Oriented Architecture (Where suitable)
+- Repository Pattern
+- Event/Listener
+- Jobs
+- Web Scrapping
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
 ## License
 
