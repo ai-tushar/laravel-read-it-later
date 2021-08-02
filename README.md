@@ -8,35 +8,36 @@ Clone the directory to your local machine using the below git command. and chang
 ```
 git clone https://github.com/ai-tushar/laravel-read-it-later.git
 ```
-#### Step 2:
-open command prompt from inside the project directory (laravel-read-it-later). If you are using Windows operating system, please use WSL command line with Ubuntu 20 image linked.
-The below steps are considering that your machine has a working docker installation.
-
-#### Step 3:
-After opening command prompt from inside the project directory, run the below command to install dependencies.
-```
-docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/opt" -w /opt laravelsail/php80-composer:latest composer install --ignore-platform-reqs
-```
-#### Step 4:
-execute the below command to make an alias for laravel `sail`. so we dont have to write `./vendor/bin/sail` every time
-```
-alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
-```
-#### Step 5: Environment setup
+#### Step 2: Environment setup
 In root directory copy `.env.example` file to `.env`. 
-Open `.env` file. Update the database connection info in below 4 properties,
+Open `.env` file. Update the database connection info in below 5 properties,
 ```
 DB_HOST=mysql
 DB_PORT=3306
 DB_DATABASE=<DB NAME YOU WANT THIS PROJECT TO RUN ON>
-DB_USERNAME=<DB USER NAME>
+DB_USERNAME=<DB USER NAME SOMETHING DIFFERENT THAN ROOT>
 DB_PASSWORD=<DB PASSWORD>
 ```
 `DB_PORT` is `3306` by default. You can change it to another free port. If you keep the default value, please make sure the port isnt being used by any other service.
 `DB_HOST` should be `mysql`
+
 `QUEUE_CONNECTION` is by default `sync`. All the Queue Jobs are synchronouse at this stage. Please change this value to `database`. So it will be like the following,
 ```
 QUEUE_CONNECTION=database
+```
+#### Step 3:
+open command prompt from inside the project directory (laravel-read-it-later). If you are using Windows operating system, please use WSL command line with Ubuntu 20 image linked.
+The below steps are considering that your machine has a working docker installation.
+
+#### Step 4:
+After opening command prompt from inside the project directory, run the below command to install dependencies.
+```
+docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/opt" -w /opt laravelsail/php80-composer:latest composer install --ignore-platform-reqs
+```
+#### Step 5:
+execute the below command to make an alias for laravel `sail`. so we dont have to write `./vendor/bin/sail` every time
+```
+alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
 ```
 #### Step 6: 
 Run docker using laravel `sail` package with below command
